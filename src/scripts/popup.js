@@ -1,4 +1,5 @@
 
+
 function closeByEsc(evt) {
   if (evt.key === "Escape") 
     closePopup(document.querySelector(".popup_is-opened")); 

@@ -1,0 +1,8 @@
+.form__input-error {
+  color: red;
+  font-size: 12;
+  opacity: 0;
+}
+.form__input-error_active {
+  opacity: 1;
+}
