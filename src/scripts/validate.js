@@ -34,6 +34,7 @@ export function showInputError (formElement, inputElement, validationMessage, va
 };
 
 export function hideInputError  (formElement, inputElement, validationConfig){
+  inputElement.setCustomValidity("");
   const errorElement = formElement.querySelector(`.${inputElement.id}-error`);
   inputElement.classList.remove(validationConfig.inputErrorClass);
   errorElement.classList.remove(validationConfig.errorClass);

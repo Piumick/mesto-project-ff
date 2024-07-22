@@ -1,178 +1,121 @@
-import { avatar, avatarLink, name, description} from "../index"
 
-const config = {
-  baseUrl: 'https://nomoreparties.co/v1/wff-cohort-16',
-  headers: {
-    authorization: "7a06ff2d-88c6-4d81-8f24-02c721a03b28",
-    'Content-Type': 'application/json'
-  }
-}
+const config = { 
+  baseUrl: 'https://nomoreparties.co/v1/wff-cohort-16', 
+  headers: { 
+    authorization: "7a06ff2d-88c6-4d81-8f24-02c721a03b28", 
+    'Content-Type': 'application/json' 
+  } 
+} 
+
 
 export const profilePromise = fetch(
-  "https://nomoreparties.co/v1/wff-cohort-16/users/me",
+  config.baseUrl+"/users/me",
   {
     method: "GET",
-    headers: {
-      authorization: "7a06ff2d-88c6-4d81-8f24-02c721a03b28",
-    },
+    headers: config.headers,
   }
-)
-  .then((res) => {
-    return res.json();
+).then((res) => {
+    if(res.ok){
+      return res.json();
+    }
+    return Promise.reject(`Ошибка: ${res.status}`);
   })
-  .then((data) => {
-    avatar.style.backgroundImage = `url(${data.avatar})`;
-    document.querySelector(".profile__title").textContent = data.name;
-    document.querySelector(".profile__description").textContent = data.about;
-    return data;
-  })
-  .catch((err) => {
-    console.log(err, "Ошибка. Запрос не выполнен");
-  });
 
-export const cardPromise = fetch("https://nomoreparties.co/v1/wff-cohort-16/cards", {
+
+export const cardPromise = fetch(config.baseUrl + "/cards", {
   method: "GET",
-  headers: {
-    authorization: "7a06ff2d-88c6-4d81-8f24-02c721a03b28",
-  },
+  headers: config.headers
 })
   .then((res) => {
-    return res.json();
+    if(res.ok){
+      return res.json();
+    }
+    return Promise.reject(`Ошибка: ${res.status}`);
   })
-  .then((data) => {
-    return data;
-  })
-  .catch((err) => {
-    console.log(err, "Ошибка. Запрос не выполнен");
-  });
+  
 
-export const updateProfilePhoto = function(avatar, avatarLink){
-  return fetch("https://nomoreparties.co/v1/wff-cohort-16/users/me", {
+export const updateProfilePhoto = function(avatarLink){
+  return fetch(config.baseUrl + "/users/me/avatar", {
     method: "PATCH",
-    headers: {
-      authorization: "7a06ff2d-88c6-4d81-8f24-02c721a03b28",
-      "Content-Type": "application/json",
-    },
+    headers: config.headers,
     body: JSON.stringify({
       avatar: avatarLink.value,
     })
   })
     .then((res) => {
-      if(res.ok)
+      if(res.ok){
         return res.json();
+      }
+      return Promise.reject(`Ошибка: ${res.status}`);
     })
-    .then((data) => {
-      avatar.style.backgroundImage = ("url("+avatarLink.value+")")
-      return data;
-    })
-    .catch((err) => {
-      console.log(err, "Ошибка. Запрос не выполнен");
-    });
-    
+  };
 
-  }
-export const updateProfile = function () {
-
-return fetch("https://nomoreparties.co/v1/wff-cohort-16/users/me", {
+export const updateProfile = function (name, description) {
+  return fetch(config.baseUrl + "/users/me", {
     method: "PATCH",
-    headers: {
-      authorization: "7a06ff2d-88c6-4d81-8f24-02c721a03b28",
-      "Content-Type": "application/json",
-    },
+    headers: config.headers,
     body: JSON.stringify({
       name: name.value,
       about: description.value,
     }),
   }).then((res) => {
-    if (res.ok)
-      console.log("Профиль обнавлен!")
+    if(res.ok){
+      return res.json();
+    }
+    return Promise.reject(`Ошибка: ${res.status}`);    
   })
-  ;
-}
+};
+
 export const postNewCard = function (cardList, cardName, url, addCard, deleteCard, likeCard, openCard){
-return fetch("https://nomoreparties.co/v1/wff-cohort-16/cards", {
+return fetch(config.baseUrl + "/cards", {
   method: "POST",
-  headers: {
-    authorization: "7a06ff2d-88c6-4d81-8f24-02c721a03b28",
-    "Content-Type": "application/json",
-  },
+  headers: config.headers,
   body: JSON.stringify({
     name: cardName.value,
     link: url.value,
   }),
 })
   .then((res) => {
-    if (res.ok)
+    if(res.ok){
       return res.json();
+    }
+    return Promise.reject(`Ошибка: ${res.status}`);
   })
-  .then((data) => {
-    console.log("Карточка создана!");
-    cardList.prepend(
-      addCard(
-        data.link,
-        data.name,
-        data.likes.lenght,
-        data.owner._id,
-        data.owner._id,
-        data._id,
-        deleteCard,
-        likeCard,
-        openCard
-      )
-    );
-  })
-  .catch((err) => {
-    console.log(err, "Ошибка. Запрос не выполнен");
-  });
-}
+};
+
 export const removeCard = function (cardId){
-fetch(`https://nomoreparties.co/v1/wff-cohort-16/cards/${cardId}`, {
+return fetch(`${config.baseUrl}/cards/${cardId}`, {
   method: 'DELETE',
-  headers: {
-    authorization: "7a06ff2d-88c6-4d81-8f24-02c721a03b28",
-    "Content-Type": "application/json",
-  },
+  headers: config.headers,
 }).then((res) => {
-  if (res.ok)
-    console.log("Карточка успешно удалена")
-})
-.catch((err)=>
-console.log(err))
-}
-export const removeLikeFromCard = function (cardId, likeCounter){
-return fetch(`https://nomoreparties.co/v1/wff-cohort-16/cards/likes/${cardId}`, {
-  method: 'DELETE',
-  headers: {
-    authorization: "7a06ff2d-88c6-4d81-8f24-02c721a03b28",
-    "Content-Type": "application/json",
-  },
-}).then((res) => {
-  if(res.ok)
+  if(res.ok){
     return res.json();
-})
-.then((data) => {
-  likeCounter.textContent = data.likes.length
-  console.log("Вы отменили оценку поста(")
-})
-.catch((err)=>{
-console.log(err)
+  }
+  return Promise.reject(`Ошибка: ${res.status}`);
+   
 })
 };
+
+export const removeLikeFromCard = function (cardId, likeCounter){
+return fetch(`${config.baseUrl}/cards/likes/${cardId}`, {
+  method: 'DELETE',
+  headers: config.headers,
+}).then((res) => {
+  if(res.ok){
+    return res.json();
+  }
+  return Promise.reject(`Ошибка: ${res.status}`);
+})
+};
+
 export const addLikeToCard = function (cardId, likeCounter){
-  return fetch(`https://nomoreparties.co/v1/wff-cohort-16/cards/likes/${cardId}`, {
+  return fetch(`${config.baseUrl}/cards/likes/${cardId}`, {
     method: 'PUT',
-    headers: {
-      authorization: "7a06ff2d-88c6-4d81-8f24-02c721a03b28",
-      "Content-Type": "application/json",
-    },
+    headers: config.headers,
   }).then((res) => {
-    if(res.ok)
+    if(res.ok){
       return res.json();
+    }
+    return Promise.reject(`Ошибка: ${res.status}`);
   })
-  .then((data) => {
-    likeCounter.textContent = data.likes.length
-    console.log("Вы оценили пост!")
-  })
-  .catch((err)=>
-  console.log(err)
-  )}
+}

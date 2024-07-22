@@ -1,9 +1,8 @@
-import { cardTemplate, popupTypeImage, popupTypeConfirm} from "../index.js";
 
 import { closePopup, openPopup } from "./popup";
-import { removeCard, removeLikeFromCard, addLikeToCard } from "./api";
+import { removeLikeFromCard, addLikeToCard } from "./api";
 
-export function addCard(link, title, likeCount, cardOwner, currentUser, cardId, deleteFunc, likeFunc, openFunc) {
+export function addCard(cardTemplate, popupTypeConfirm, link, title, likeCount, likeState, cardOwner, currentUser, cardId, deleteFunc, likeFunc, openFunc) {
   const cardElement = cardTemplate.querySelector(".card").cloneNode(true);
   const deleteButton = cardElement.querySelector(".card__delete-button");
   const likeButton = cardElement.querySelector(".card__like-button");
@@ -21,7 +20,7 @@ export function addCard(link, title, likeCount, cardOwner, currentUser, cardId, 
   cardTitle.textContent = title;
 
   deleteButton.addEventListener("click", function () {
-    deleteFunc(cardElement, cardId);
+    deleteFunc(cardElement, cardId, popupTypeConfirm);
   });
 
   likeButton.addEventListener("click", function () {
@@ -31,31 +30,35 @@ export function addCard(link, title, likeCount, cardOwner, currentUser, cardId, 
   cardImage.addEventListener("click", () => {
     openFunc(link, title);
   });
+  if(likeState)
+    likeButton.classList.add("card__like-button_is-active")
 
   return cardElement;
 }
-export const deleteCard = function (deleteElement, cardId) {
-  openPopup(popupTypeConfirm)
-  const confirmButton = popupTypeConfirm.querySelector('.popup__button')
-  confirmButton.addEventListener('click', ()=>{
-    deleteElement.remove();
-    closePopup(popupTypeConfirm)
-    removeCard(cardId)
-
-  })
-  
-  
-};
 
 
 export const likeCard = function (likeElement, likeCounter, cardId) {
   if (likeElement.classList.contains("card__like-button_is-active")){
     likeElement.classList.remove("card__like-button_is-active");
     removeLikeFromCard(cardId, likeCounter)
+    .then((data) => {
+      likeCounter.textContent = data.likes.length
+      console.log("Вы отменили оценку поста(")
+    })
+    .catch((err)=>{
+    console.log(err)
+    })
     }
   else{
     likeElement.classList.add("card__like-button_is-active")
     addLikeToCard(cardId, likeCounter)
-  }
+    .then((data) => {
+      likeCounter.textContent = data.likes.length
+      console.log("Вы оценили пост!")
+    })
+    .catch((err)=>
+    console.log(err)
+    )}
+  
 }
 
