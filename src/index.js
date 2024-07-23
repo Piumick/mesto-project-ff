@@ -105,6 +105,7 @@ const submitAddCardForm = function (evt){
   addCardForm.querySelector(".popup__button").innerText = "Сохранение..."
   postNewCard(cardList, cardName, url, addCard, deleteCard, likeCard, openCard) 
   .then((data) => {
+    clearValidation(addCardForm, validationConfig);
     addCardForm.reset();
     closePopup(popupTypeNewCard);
     console.log("Карточка создана!");
@@ -219,7 +220,7 @@ editProfilePhotoForm.addEventListener("submit", (evt) => {
   
 profileAddButton.addEventListener("click", () => {
   openPopup(popupTypeNewCard);
-  clearValidation(addCardForm, validationConfig);
+
 
 });
 
