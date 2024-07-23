@@ -6,32 +6,29 @@ const config = {
     'Content-Type': 'application/json' 
   } 
 } 
+const checkRes = function (res){
+  if(res.ok){
 
+  return res.json()
+  
+}
 
-export const profilePromise = fetch(
+return Promise.reject(`Ошибка: ${res.status}`)}
+
+export const getUserInfo = fetch(
   config.baseUrl+"/users/me",
   {
     method: "GET",
     headers: config.headers,
   }
-).then((res) => {
-    if(res.ok){
-      return res.json();
-    }
-    return Promise.reject(`Ошибка: ${res.status}`);
-  })
+).then((res) => {return checkRes(res)})
 
 
-export const cardPromise = fetch(config.baseUrl + "/cards", {
+export const getInitialCards = fetch(config.baseUrl + "/cards", {
   method: "GET",
   headers: config.headers
 })
-  .then((res) => {
-    if(res.ok){
-      return res.json();
-    }
-    return Promise.reject(`Ошибка: ${res.status}`);
-  })
+  .then((res) => {return checkRes(res)})
   
 
 export const updateProfilePhoto = function(avatarLink){
@@ -43,11 +40,7 @@ export const updateProfilePhoto = function(avatarLink){
     })
   })
     .then((res) => {
-      if(res.ok){
-        return res.json();
-      }
-      return Promise.reject(`Ошибка: ${res.status}`);
-    })
+      {return checkRes(res)}})
   };
 
 export const updateProfile = function (name, description) {
@@ -58,11 +51,7 @@ export const updateProfile = function (name, description) {
       name: name.value,
       about: description.value,
     }),
-  }).then((res) => {
-    if(res.ok){
-      return res.json();
-    }
-    return Promise.reject(`Ошибка: ${res.status}`);    
+  }).then((res) => {return checkRes(res)    
   })
 };
 
@@ -75,47 +64,26 @@ return fetch(config.baseUrl + "/cards", {
     link: url.value,
   }),
 })
-  .then((res) => {
-    if(res.ok){
-      return res.json();
-    }
-    return Promise.reject(`Ошибка: ${res.status}`);
-  })
+  .then((res) => {return checkRes(res)})
 };
 
 export const removeCard = function (cardId){
 return fetch(`${config.baseUrl}/cards/${cardId}`, {
   method: 'DELETE',
   headers: config.headers,
-}).then((res) => {
-  if(res.ok){
-    return res.json();
-  }
-  return Promise.reject(`Ошибка: ${res.status}`);
-   
-})
+}).then((res) => {return checkRes(res)})
 };
 
 export const removeLikeFromCard = function (cardId, likeCounter){
 return fetch(`${config.baseUrl}/cards/likes/${cardId}`, {
   method: 'DELETE',
   headers: config.headers,
-}).then((res) => {
-  if(res.ok){
-    return res.json();
-  }
-  return Promise.reject(`Ошибка: ${res.status}`);
-})
+}).then((res) => {return checkRes(res)})
 };
 
 export const addLikeToCard = function (cardId, likeCounter){
   return fetch(`${config.baseUrl}/cards/likes/${cardId}`, {
     method: 'PUT',
     headers: config.headers,
-  }).then((res) => {
-    if(res.ok){
-      return res.json();
-    }
-    return Promise.reject(`Ошибка: ${res.status}`);
-  })
+  }).then((res) => {return checkRes(res)})
 }

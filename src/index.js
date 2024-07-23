@@ -11,7 +11,7 @@ import {
   enableValidation,
   clearValidation,
 } from "./scripts/validate";
-import { profilePromise, cardPromise, updateProfilePhoto, updateProfile, postNewCard, removeCard } from "./scripts/api"
+import { getUserInfo, getInitialCards, updateProfilePhoto, updateProfile, postNewCard, removeCard } from "./scripts/api"
 import "./pages/index.css";
 
 const validationConfig = {
@@ -48,6 +48,7 @@ const avatarLink = document.querySelector(".popup__input_type_photo")
 
 const cardName = document.querySelector(".popup__input_type_card-name");
 const url = document.querySelector(".popup__input_type_url");
+const popupCloseButtons = document.querySelectorAll(".popup__close");
 
 const openCard = function (link, title) {
   openPopup(popupTypeImage);
@@ -78,11 +79,90 @@ const deleteCard = function (deleteElement, cardId ) {
   })
 };
 
-Promise.all([profilePromise, cardPromise])
+const submitUpdateAvatarForm = function (evt){
+  confirmButtonTypeNewPhoto.innerText = "Сохранение..."
+  evt.preventDefault();
+
+  updateProfilePhoto(avatarLink).then((data) => {
+    clearValidation(
+      popupTypeEditPhoto.querySelector(".popup__form"),
+      validationConfig
+    );
+    closePopup(popupTypeEditPhoto);
+    avatar.style.backgroundImage = ("url("+avatarLink.value+")")
+    return data;
+  })
+  .catch((err) => {
+    console.log(err, "Ошибка. Запрос не выполнен");
+  })
+  .finally(()=>{
+     confirmButtonTypeNewPhoto.innerText = "Сохранить"
+    }
+  )
+}
+const submitAddCardForm = function (evt){
+  evt.preventDefault();
+  addCardForm.querySelector(".popup__button").innerText = "Сохранение..."
+  postNewCard(cardList, cardName, url, addCard, deleteCard, likeCard, openCard) 
+  .then((data) => {
+    addCardForm.reset();
+    closePopup(popupTypeNewCard);
+    console.log("Карточка создана!");
+    cardList.prepend(
+      addCard(
+        cardTemplate,
+        popupTypeConfirm,
+        data.link,
+        data.name,
+        data.likes.lenght,
+        false,
+        data.owner._id,
+        data.owner._id,
+        data._id,
+        deleteCard,
+        likeCard,
+        openCard
+      )
+    );
+  
+  })
+  .catch((err) => {
+    console.log(err, "Ошибка. Запрос не выполнен");
+      
+  }).finally(()=>{
+    addCardForm.querySelector(".popup__button").innerText = "Сохранить"
+  });
+
+}
+const submitEditProfileForm = function (evt) {
+  evt.preventDefault();
+  
+  editProfileForm.querySelector(".popup__button").innerText = "Сохранение..."
+
+  updateProfile(name, description).then(()=>{
+    document.querySelector(".profile__title").textContent = name.value;
+    document.querySelector(".profile__description").textContent = description.value;
+    
+    closePopup(popupTypeEdit);
+    clearValidation(
+      popupTypeEdit.querySelector(".popup__form"),
+      validationConfig
+    );
+  }).catch((err)=>{
+    
+    console.log(err)
+  }).finally(()=>{
+    editProfileForm.querySelector(".popup__button").innerText = "Сохранить"
+  })
+
+
+}
+
+Promise.all([getUserInfo, getInitialCards])
   .then((res) => {
     let likerId = []
 
-    console.log(res)
+
     avatar.style.backgroundImage = `url(${res[0].avatar})`;
     document.querySelector(".profile__title").textContent = res[0].name;
     document.querySelector(".profile__description").textContent = res[0].about;
@@ -113,7 +193,7 @@ Promise.all([profilePromise, cardPromise])
     console.log(err);
   });
 
-document.querySelectorAll(".popup__close").forEach((element) => {
+popupCloseButtons.forEach((element) => {
   element.addEventListener("click", () => {
     closePopup(element.closest(".popup"));
   });
@@ -121,41 +201,20 @@ document.querySelectorAll(".popup__close").forEach((element) => {
 
 profileEditButton.addEventListener("click", () => {
   
-
   openPopup(popupTypeEdit);
   name.value = document.querySelector(".profile__title").textContent;
   description.value = document.querySelector(".profile__description").textContent;
 
-  clearValidation(
-    popupTypeEdit.querySelector(".popup__form"),
-    validationConfig
-  );
 });
 
 avatar.addEventListener("click", () =>{
    
-  clearValidation(
-    popupTypeEditPhoto.querySelector(".popup__form"),
-    validationConfig
-  );
+  
   openPopup(popupTypeEditPhoto);
 })
 
 editProfilePhotoForm.addEventListener("submit", (evt) => {
-  evt.preventDefault();
-  confirmButtonTypeNewPhoto.innerText = "Сохранение..."
-  updateProfilePhoto(avatarLink).then((data) => {
-    closePopup(popupTypeEditPhoto);
-    avatar.style.backgroundImage = ("url("+avatarLink.value+")")
-    confirmButtonTypeNewPhoto.innerText = "Сохранить"
-    return data;
-  })
-  .catch((err) => {
-    console.log(err, "Ошибка. Запрос не выполнен");
-    confirmButtonTypeNewPhoto.innerText = "Сохранить"
-  });
-  
-  
+  submitUpdateAvatarForm(evt)
 })
   
 profileAddButton.addEventListener("click", () => {
@@ -165,58 +224,11 @@ profileAddButton.addEventListener("click", () => {
 });
 
 editProfileForm.addEventListener("submit", (evt) => {
-  evt.preventDefault();
-  
-  editProfileForm.querySelector(".popup__button").innerText = "Сохранение..."
-
-  document.querySelector(".profile__title").textContent = name.value;
-  document.querySelector(".profile__description").textContent = description.value;
-
-  updateProfile(name, description).then(()=>{
-    editProfileForm.querySelector(".popup__button").innerText = "Сохранить"
-    closePopup(popupTypeEdit);
-  }).catch((err)=>{
-    editProfileForm.querySelector(".popup__button").innerText = "Сохранить"
-    console.log(err)
-  })
-
-
+  submitEditProfileForm(evt)
 });
 
 addCardForm.addEventListener("submit", (evt) => {
-  evt.preventDefault();
-
-  addCardForm.querySelector(".popup__button").innerText = "Сохранение..."
-  
-  postNewCard(cardList, cardName, url, addCard, deleteCard, likeCard, openCard) 
-  .then((data) => {
-    addCardForm.reset();
-    closePopup(popupTypeNewCard);
-    console.log("Карточка создана!");
-    cardList.prepend(
-      addCard(
-        cardTemplate,
-        popupTypeConfirm,
-        data.link,
-        data.name,
-        data.likes.lenght,
-        false,
-        data.owner._id,
-        data.owner._id,
-        data._id,
-        deleteCard,
-        likeCard,
-        openCard
-      )
-    );
-  addCardForm.querySelector(".popup__button").innerText = "Сохранить"
-  })
-  .catch((err) => {
-    console.log(err, "Ошибка. Запрос не выполнен");
-      addCardForm.querySelector(".popup__button").innerText = "Сохранить"
-  });
-
-
+  submitAddCardForm(evt)
 });
 
 enableValidation(validationConfig);

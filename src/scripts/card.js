@@ -1,5 +1,4 @@
 
-import { closePopup, openPopup } from "./popup";
 import { removeLikeFromCard, addLikeToCard } from "./api";
 
 export function addCard(cardTemplate, popupTypeConfirm, link, title, likeCount, likeState, cardOwner, currentUser, cardId, deleteFunc, likeFunc, openFunc) {
